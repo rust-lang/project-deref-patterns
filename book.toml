@@ -1,10 +1,10 @@
 [book]
-authors = ["{{GROUP_NAME}} Members"]
+authors = ["Deref Patterns Project Group Members"]
 language = "en"
 multilingual = false
 src = "."
-title = "{{GROUP_NAME}} {{GROUP_TYPE}} Group"
+title = "Deref Patterns Project Group"
 
 [output.html]
 no-section-label=true
-git-repository-url="https://github.com/rust-lang/{{GROUP_SLUG}}"
+git-repository-url="https://github.com/rust-lang/project-deref-patterns"
