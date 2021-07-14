@@ -1,32 +1,59 @@
-# {{GROUP_NAME}} Charter
-<!--
- Provide an introduction summarising the goals and motivation behind your
- project group.
--->
+The canonical version of the charter is in the lang team repo: [deref-patterns.md](https://github.com/rust-lang/lang-team/blob/master/projects/deref-patterns.md).
 
-## Goals
+# Deref Patterns Project Group Charter
 
-<!--
- Explain what changes you'd like to see your group your group to focus on, and
- how you plan to approach these issues. Focus on explaining the highest possible
- level of your change.
--->
+Allow pattern matching through types that impl `Deref` or `DerefMut`. 
 
-## Constraints And Considerations
+## Summary and problem statement
 
-<!--
- Explain the scope of your group, what you have chosen not to include in
- your goals, and your motivations behind making them non-goals.
--->
+Currently in rust, matching is blocked by bounderies like smart pointers, containers, and some wrappers. 
+To solve this problem you would need to either use if let guards (unstable), or nested match/if-let. 
+The former is limited to one such level, and the latter can become excessive for deeply nested types. 
+To solve this, it is proposed propose that "deref patterns" be added, to allow for such matching to be performed.
+
+An exception to the above problem, is that `Box<T>` can be matched with `feature(box_patterns)`. 
+However, this is magic behaviour of box, and a goal of this project is to remove or reduce that magic. 
+
+The proposed solution has a number of unanswered questions, including the syntax for patterns, whether or not to limit to standard library types,
+ and how to allow exhaustive patterns soundly if not limited to standard library types. 
+
+### Exhaustive Patterns and Soundness
+
+One current issue with the proposed deref patterns is that if applied generally to any type that implements `Deref`, 
+it cannot soundly permit exhaustive pattern matching, as a malicious `Deref` impl could return a different value each time.
+An trivial example would be  `Deref` impl that returns a static reference to an enum value that is chosen randomly
+There are currently 3 different possible solutions:
+* Do not treat deref patterns as exhausitve
+* Restrict deref patterns to (possibly a subset of) standard library types
+* Expose an unsafe lang item trait called `DerefPure`, and restrict deref patterns to implementors of that trait
+
+This initial Project Group will persue the second option, that is limiting deref patterns to a subset of standard library types. Other projects may, in the future, expand upon the work from this project to include user-provided types. The project will determine the critera for a subset needed for sound exhaustive matching, and propose an initial subset to support.
 
 
-## Membership
+## Motivation, use-cases, and solution sketches
 
-<!--
- Mention your initial membership and who has decided take the roles of
- shepherd(s) and liason.
--->
+Recursive types necessarily include smart pointers, even when you could normally match through them.
+For example, in a work in progress proc-macro to support restricted variadic generics, the parser needed to match "fold expressions", which take the form `(<pattern> <op> ...)`. With deref patterns, this could be implemented using `Expr::Paren(ParenExpr{expr: Expr::Binary(ExprBinary{ left, op, right: Expr::Verbatim(t), ..}), ..})`. However, this is currently not possible, and required nested matches.  
+This generalizes to any case where you need to check some pattern, but hit a deref boundery. 
 
-**Shepherd:**
-**Team Liason:**
-**Members:**
+
+
+## Prioritization
+
+This likely does not fit into any of the listed priorities, though it may be considered "Targeted ergonomic wins and extensions".
+
+## Links and related work
+
+This has been discussed on the Rust Internals Forum at <https://internals.rust-lang.org/t/somewhat-random-idea-deref-patterns/13813>, 
+as well as on zulip at <https://rust-lang.zulipchat.com/#narrow/stream/213817-t-lang/topic/Deref.20patterns>. 
+
+A tracking document of all currently discussed questions and potential answers can be found here <https://hackmd.io/GBTt4ptjTh219SBhDCPO4A>. 
+
+Prior discussions raised on the IRLO thread:
+* https://github.com/rust-lang/rfcs/pull/462
+* https://github.com/rust-lang/rfcs/issues/2099
+* https://github.com/rust-lang/rfcs/blob/master/text/0809-box-and-in-for-stdlib.md
+
+## Initial people involved
+
+Initially, Connor Horman and Nadriel on zulip would be involved
