@@ -6,7 +6,7 @@ Allow pattern matching through types that impl `Deref` or `DerefMut`.
 
 ## Summary and problem statement
 
-Currently in rust, matching is blocked by bounderies like smart pointers, containers, and some wrappers. 
+Currently in rust, matching is blocked by boundaries like smart pointers, containers, and some wrappers. 
 To solve this problem you would need to either use if let guards (unstable), or nested match/if-let. 
 The former is limited to one such level, and the latter can become excessive for deeply nested types. 
 To solve this, it is proposed propose that "deref patterns" be added, to allow for such matching to be performed.
